@@ -1,0 +1,45 @@
+name: Chrome Remote Desktop
+
+on:
+  workflow_dispatch:
+   inputs:
+     auth:
+        description: 'Google Remote Desktop Command'
+        default: ''
+        required: true
+     pin:
+        description: 'PIN'
+        default: '123456'
+        required: true
+     chrome:
+        description: |
+          [boolean] Choose one
+        default: true
+        required: false
+defaults:
+  run:
+    shell: bash
+    
+    jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    name: 'Set up a Ubuntu machine'
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb x11-xkb-utils xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic x11-apps dbus-x11 wget
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg --install google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y --no-install-recommends xfce4 desktop-base dbus-x11 xscreensaver
+          sudo apt-get install -y chrome-remote-desktop
+     - name: Run RD command
+      run: "${{ github.event.inputs.auth }} --pin=${{ github.event.inputs.pin }}"
+   
+   - name: Create SSH Access
+      uses: mxschmitt/action-tmate@v3
