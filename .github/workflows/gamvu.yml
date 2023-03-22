@@ -1,5 +1,8 @@
-name: Chrome Remote Desktop
+# This is a basic workflow to help you get started with Actions
 
+name: Ubuntu Remote Virtual Machine
+
+# Controls when the workflow will run
 on:
   workflow_dispatch:
    inputs:
@@ -19,8 +22,8 @@ on:
 defaults:
   run:
     shell: bash
-    
-    jobs:
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
@@ -30,16 +33,18 @@ defaults:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v3
-    - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb x11-xkb-utils xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic x11-apps dbus-x11 wget
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg --install google-chrome-stable_current_amd64.deb
-          sudo apt-get install -y --no-install-recommends xfce4 desktop-base dbus-x11 xscreensaver
-          sudo apt-get install -y chrome-remote-desktop
-     - name: Run RD command
+    - name: Add User
+      run: |
+        sudo useradd -m brooke
+        sudo adduser brooke sudo
+        echo 'brooke:Jacobs123' | sudo chpasswd
+        sudo sed -i 's/\/bin\/sh/\/bin\/bash/g' /etc/passwd
+    - name: Install
+      run: |
+         wget https://raw.githubusercontent.com/testonamonaco/actions-remote-desktops/main/install.sh
+         sudo chmod +x ./install.sh
+         sudo ./install.sh
+    - name: Run RD command
       run: "${{ github.event.inputs.auth }} --pin=${{ github.event.inputs.pin }}"
-   
-   - name: Create SSH Access
+    - name: Create SSH Access
       uses: mxschmitt/action-tmate@v3
